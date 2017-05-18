@@ -81,7 +81,7 @@ $| = 1;
 # the remaining data is the window itself, in which 1s and 0s represent
 # presence/absence of a given pixel, respectively.
 #
-my $W_operator = $ARGV[1];
+my $window = $ARGV[1];
 
 my $ideal_image = [];
 my $observed_image = [];
@@ -124,12 +124,12 @@ print "[done]\n";
 
 # Create a new image.
 #
-my $im = new GD::Image($width, $height);
+my $im = new GD::Image ($width, $height);
 
 # Allocate the used colors.
 #
-my $white = $im->colorAllocate(255,255,255);
-my $black = $im->colorAllocate(0,0,0);  
+my $white = $im->colorAllocate (255,255,255);
+my $black = $im->colorAllocate (0,0,0);  
 
 print "Loading the ideal image matrix and creating the ideal image file... ";
 
@@ -208,8 +208,8 @@ print "[done]\n";
 #
 print "Loading W-operator window data... ";
 
-open (ARQ, $INPUT_WINDOWS_DIR . $W_operator)
-  or die "Could not open $W_operator file!\n";
+open (ARQ, $INPUT_WINDOWS_DIR . $window)
+  or die "Could not open $window file!\n";
 
 my $lines = <ARQ>;
 my $columns = <ARQ>;
@@ -271,7 +271,7 @@ print "Verified $sample_counter realizations of the window through this image.";
 print "\n";
 print "Printing into a DAT file the frequencies of the W-operator window... ";
 
-open(ARQ,">" . $OUTPUT_DAT_DIR . $file . "_" . $W_operator . ".dat");
+open(ARQ,">" . $OUTPUT_DAT_DIR . $file . "_" . $window . ".dat");
 
 foreach my $realization (sort keys %frequency_0)
 {
