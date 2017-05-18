@@ -1,11 +1,12 @@
 #!/usr/bin/perl -w
 
-#    Parse an image, creating the binary ideal image, the binary observed image
-#    with a given amount of salt-and-pepper noise, and some given amount of 
-#    samples for windows of a given size.
 #
-#    This file is part of the W-operator-filter program.
-#    Copyright (C) 2017  Marcelo S. Reis.
+#    This program parses an image, creating the binary ideal image, the binary
+#    observed image with a given amount of salt-and-pepper noise, and some given
+#    amount of samples for windows of a given size.
+#
+#    This file is part of the W-operator-filter package.
+#    Copyright (C) 2017 Marcelo S. Reis.
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -57,7 +58,7 @@ my $OUTPUT_DAT_DIR     = "output/dat/";
 
 # Sample file must be without directory and extension. Example:
 #
-#  ./parse_image.pl sample_01 W_03
+#  ./src/parse_image.pl sample_01 W_03
 #
 @ARGV == 2 or die "\nSyntax: $0 sample_file window_file\n\n";
 
