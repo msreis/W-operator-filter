@@ -80,7 +80,7 @@ close (INPUT);
 printf "Printing into a DAT file the frequencies of a window of size %d... ",
        length $subset;
 
-open (OUTPUT, ">" . $INPUT_OPERATOR_DIR . $file . ".operator");
+open (OUTPUT, ">" . $OUTPUT_OPERATOR_DIR . $file . ".operator");
 
 foreach my $realization (sort keys %frequency_0)
 {
