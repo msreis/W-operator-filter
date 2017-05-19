@@ -16,7 +16,7 @@ src/design_W_operator.pl:
   a sample of a window of size n, designs a W-operator of size n.
 
   Example of a feature selection procedure using the featsel framework
-  (which is available at https://github.com/msreis/featsel)):
+  (which is available at https://github.com/msreis/featsel):
 
   ./featsel -a es -n 3 -m 8 -c mce -f output/dat/sample_01_W_03.dat
 
