@@ -31,17 +31,13 @@ use Data::Dumper;  # Useful to dump a data structure in order to inspect it.
 #
 use GD;
 
-# for floor and ceiling functions
+# Allows the usage of floor and ceiling functions;
 #
 use POSIX;
 
-
-# This constant defines the proportion of the observations that will be used
-# to generate the samples. Observe that a reduction in the size of the stored
-# samples leads to an increase on the estimation error! 
+# This is useful for shuffling arrays.
 #
-my $SIZE_OF_SAMPLING = 0.0004;
-
+use List::Util 'shuffle';
 
 # This constant defines the proportion of salt and pepper noise that will be
 # applied on the observed image
@@ -83,13 +79,26 @@ $| = 1;
 #
 my $window = $ARGV[1];
 
+$window =~ /(\d+)/;
+my $number_of_features = $1;
+
+print "Screening image with a window of size $number_of_features.\n";
+
 my $ideal_image = [];
 my $observed_image = [];
 
 my $gdimg = GD::Image->newFromPng ($INPUT_IMAGES_DIR . $file . ".png");
 my ($width, $height) = $gdimg->getBounds ();
 
-print "Loading the image '" . $file . ".png' from file... ";
+
+# This constant defines the proportion of the observations that will be used
+# to generate the samples. Observe that a reduction in the size of the stored
+# samples leads to an increase on the estimation error! 
+#
+my $alpha = 0.25;
+my $SIZE_OF_SAMPLING = int (($width * $height) ** $alpha * $number_of_features);
+
+printf "Loading the image '" . $file . ".png' from file... ";
 
 my $x = 0;
 while ($x < $width) 
@@ -121,6 +130,9 @@ while ($x < $width)
 }
 
 print "[done]\n";
+
+printf "Image with width = $width and height = $height (%d pixels)\n",
+       $width * $height;
 
 # Create a new image.
 #
@@ -235,8 +247,7 @@ print "Scanning the matrices and counting the frequencies of the " .
 my $middle_column = floor ($columns / 2);
 my $middle_line = floor ($lines / 2);
 
-my %frequency_0;
-my %frequency_1;
+my @list_of_observations;
 
 my $sample_counter = 0;
 
@@ -244,24 +255,20 @@ for (my $x = 0 + $middle_column; $x < $width - $middle_column; $x++)
 {
   for (my $y = 0 + $middle_line; $y < $height - $middle_line; $y++)
   {
-    if (rand(1) < $SIZE_OF_SAMPLING)  # It counts only a fraction of the image.
-    {
-      $sample_counter++;
+    $sample_counter++;
 	  
-      my $realization = get_realization ($observed_image, $x,$y, $middle_column,
-                                         $middle_line, \@W_operator);
-	    
-      if ($ideal_image->[$y]->[$x] == 0)
-      {
-        $frequency_0{$realization}++;
-        defined $frequency_1{$realization} or $frequency_1{$realization} = 0;
-      }
-      else
-      {
-        $frequency_1{$realization}++;
-        defined $frequency_0{$realization} or $frequency_0{$realization} = 0;
-      }
+    my $realization = get_realization ($observed_image, $x,$y, $middle_column,
+                                       $middle_line, \@W_operator);	    
+
+    if ($ideal_image->[$y]->[$x] == 0)
+    {
+      push @list_of_observations, "$realization 1 0";
     }
+    else
+    {
+      push @list_of_observations, "$realization 0 1";
+    }
+
   }  # for $y
 }  # for $x 
 
@@ -269,14 +276,36 @@ print "[done]\n";
 
 print "Verified $sample_counter realizations of the window through this image.";
 print "\n";
+print "However, only $SIZE_OF_SAMPLING of them will be saved into DAT file!\n";
 print "Printing into a DAT file the frequencies of the W-operator window... ";
 
-open(ARQ,">" . $OUTPUT_DAT_DIR . $file . "_" . $window . ".dat");
+$file =~ /(\d+)/;
+my $test_number = sprintf "%02d", $1;
 
-foreach my $realization (sort keys %frequency_0)
+my $features_string = sprintf "%03d", $number_of_features;
+
+open(ARQ,">" . $OUTPUT_DAT_DIR . "Test_" . $features_string . "_" . $test_number
+             . ".dat");
+
+foreach my $index (shuffle (0..$#list_of_observations))
 {
-  printf ARQ "%s %d %d\n", $realization,  $frequency_0{$realization},
-                           $frequency_1{$realization};
+  if ($SIZE_OF_SAMPLING > 0)
+  {
+    printf ARQ "%s\n", $list_of_observations[$index];
+
+    $SIZE_OF_SAMPLING--;
+  }
+  else
+  {
+    close(ARQ);
+
+    print "[done]\n";
+    print "\nEnd of execution.\n\n";
+
+    # End of program.
+    #
+    exit 0;
+  }
 }
 
 close(ARQ);
